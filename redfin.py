@@ -35,25 +35,29 @@ class RedFin():
         self.use_proxies = False
         self.output_data = []
         self.property_urls = []
-        #  load proxies from file one per line proxy:port format
-        self.proxies = [l.rstrip() for l in open('proxies.txt').readlines()]
-        #  make a separate session for each proxy
-        self.sessions = {}
-        for proxy in self.proxies:
-            self.sessions[proxy] = {
-                'session': requests.Session(),
-                'proxy': {'http': 'http://' + proxy,
-                          'https': 'https://' + proxy}
-            }
+        try:
+            #  load proxies from file one per line proxy:port format
+            self.proxies = [l.rstrip() for l in open('proxies.txt').readlines()]
+            #  make a separate session for each proxy
+            self.sessions = {}
+            for proxy in self.proxies:
+                self.sessions[proxy] = {
+                    'session': requests.Session(),
+                    'proxy': {'http': 'http://' + proxy,
+                              'https': 'https://' + proxy}
+                }
+        except IOError:
+            pass
         # load data collected so far in order to avoid needing to scrape
         #  the same data twice
         try:
             self.output_data = json.loads(open('redfin_output.json').read())
-        except:
+        except IOError:
             self.output_data = []
 
     def rand_sleep(self):
         #  you can set the random sleep time for no browser mode here
+        #zach, comment out sleep for now
         sleep(randint(5, 10))
 
     def parse_finished_urls(self):
@@ -101,11 +105,19 @@ class RedFin():
         #  if 10 fails reached assume we've been blcoked
         for i in range(10):
             try:
+                print property_url
+                if 'https' not in property_url:
+                    #new_property_url = property_url.split('/', 3)
+                    new_property_url = 'https://www.redfin.com' + property_url
+                    print new_property_url
+                    property_url = new_property_url
                 http_response = self.session.get(property_url, headers=user_agent_header, verify=False)
                 if http_response.status_code == 200: break
             except Exception as e:
                 print(1, 'Request error')
-            if i == 9: print(1, 'blocked error');exit()
+            if i == 9:
+                print(1, 'blocked error')
+                exit()
         return http_response.text
 
     def make_page_request_proxy(self, property_url):
@@ -191,6 +203,12 @@ class RedFin():
             property_data['status'] = 'N/A';print('status not found')
 
         property_data['summary'] = self.soup.find('div', attrs={'class': 'remarks'}).get_text()
+        #for row in self.soup.find('div', attrs={'class': 'more-info-div'}).find_all('tr'):
+        if self.soup.find('div', attrs={'class': 'more-info-div'}) is None:
+            print 'None found in page, returning early'
+            property_data['url'] = 'https://www.redfin.com' + property_url
+            self.output_data.append(property_data)
+            return property_data
         for row in self.soup.find('div', attrs={'class': 'more-info-div'}).find_all('tr'):
             cells = row.find_all('td')
             property_data[cells[0].get_text().strip()] = cells[1].get_text().strip()
