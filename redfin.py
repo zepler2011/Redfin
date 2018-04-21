@@ -25,9 +25,10 @@ reg_property_urls = re.compile('(/[A-Z][A-Z]/[A-Za-z\-/0-9]+/home/[0-9]+)')
 user_agent_header = {
     'User-agent': 'Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.112 Safari/537.36'}
 
-
 class RedFin():
     def __init__(self):
+        """ XXX TODO: add search conditions, and make start_url into the
+        """
         self.start_url = 'https://www.redfin.com/city/517/CA/Anaheim/'
         self.session = requests.Session()
         self.use_selenium = False
@@ -54,10 +55,10 @@ class RedFin():
             self.output_data = json.loads(open('redfin_output.json').read())
         except IOError:
             self.output_data = []
+        return
 
     def rand_sleep(self):
         #  you can set the random sleep time for no browser mode here
-        #zach, comment out sleep for now
         sleep(randint(5, 10))
 
     def parse_finished_urls(self):
@@ -71,17 +72,29 @@ class RedFin():
         print(str(len(self.property_urls)) + ' proeprties to go')
 
     def get_search_results(self):
+        """
+        Get the list of all property urls
+        """
         page_source = self.request_search_page(self.start_url)
         self.property_urls = reg_property_urls.findall(page_source.replace('\\u002F', '/'))
         self.property_urls = list(Set(self.property_urls))
         print('found ' + str(len(self.property_urls)) + ' results')
-        self.parse_finished_urls()
+        # comment out for now
+        #self.parse_finished_urls()
 
     def request_search_page(self, page_url):
         if self.use_selenium:
             return self.get_page_selenium(page_url)
         else:
             return self.make_page_request(page_url)
+
+    def get_one_property_data(self, property_url=None):
+        if property_url is None:
+            property_url = self.property_urls[0]
+        print self.get_property_page(property_url)
+        # XXX do not append or write to output file 
+        #self.output_data.append(self.get_property_page(property_url))
+        #open('redfin_output.json', 'w').write(json.dumps(self.output_data, indent=4))
 
     def get_property_data(self):
         count = 0
