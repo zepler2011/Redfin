@@ -29,7 +29,7 @@ class RedFin():
     def __init__(self):
         """ XXX TODO: add search conditions, and make start_url into the
         """
-        self.start_url = 'https://www.redfin.com/city/517/CA/Anaheim/'
+        self.start_url = 'https://www.redfin.com/city/8439/CA/Hayward/'
         self.session = requests.Session()
         self.use_selenium = False
         #  proxy option can be set after class object is loaded
