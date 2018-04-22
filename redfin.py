@@ -71,11 +71,28 @@ class RedFin():
         print(str(len(done_urls_list)) + ' properties already done')
         print(str(len(self.property_urls)) + ' proeprties to go')
 
-    def get_search_results(self):
+    def get_search_results(self, filter=None):
         """
         Get the list of all property urls
         """
-        page_source = self.request_search_page(self.start_url)
+        search_url = self.start_url
+        if filter:
+            filterStr = 'filter/'
+            price = filter.get('price')
+            if price is not None:
+                # example: filter/min-price=50k,max-price=75k
+                minprice = price.get('min')
+                if minprice:
+                    filterStr += 'min-price='
+                    filterStr += minprice
+                    filterStr += ','
+                maxprice = price.get('max')
+                if maxprice:
+                    filterStr += 'max-price='
+                    filterStr += maxprice
+                    filterStr += ','
+            search_url += filterStr
+        page_source = self.request_search_page(search_url)
         self.property_urls = reg_property_urls.findall(page_source.replace('\\u002F', '/'))
         self.property_urls = list(Set(self.property_urls))
         print('found ' + str(len(self.property_urls)) + ' results')
