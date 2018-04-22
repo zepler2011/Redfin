@@ -12,8 +12,6 @@ class House(object):
         beds=None,
         baths=None,
         sq_ft=None,
-        parking=None,
-        parking_type=None,
         lot_size=None,
         home_type=None
     ):
@@ -24,10 +22,10 @@ class House(object):
         self.beds = beds
         self.baths = baths
         self.sq_ft = sq_ft
-        self.parking = parking
-        self.parking_type = parking_type
         self.lot_size = lot_size
         self.home_type = home_type
+        self.redfin_data = None
+        self.redfin_url = None
         return
 
     def as_dict(self):

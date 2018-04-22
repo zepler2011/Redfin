@@ -92,6 +92,7 @@ class RedFin():
         if property_url is None:
             property_url = self.property_urls[0]
         print self.get_property_page(property_url)
+        return self.get_property_page(property_url)
         # XXX do not append or write to output file 
         #self.output_data.append(self.get_property_page(property_url))
         #open('redfin_output.json', 'w').write(json.dumps(self.output_data, indent=4))
