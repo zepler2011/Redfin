@@ -1,5 +1,19 @@
 #!/usr/bin/env python
 
+from datetime import datetime
+
+_TAX_BRACKET = {
+    "2018": {
+              19050 : 0.1,
+              77400 : 0.12,
+             165000 : 0.22,
+             315000 : 0.24,
+             400000 : 0.32,
+             600000 : 0.35,
+        1000000000L : 0.37   # 1 billion as ceiling limit :)
+    }
+}
+
 class PropertyTax():
     def __init__(self,
                  property_tax=None,
@@ -60,34 +74,74 @@ class GrossIncome():
 
 class IncomeTax():
     def __init__(self,
-                 mortgage=None,
-                 gross_income=None,
-                 property_tax=None,
-                 mortgage_interest=None,
-                 gross_income_annual_increase_rate=None):
+                 gross_income,
+                 mortgage,
+                 property_tax,
+                 years):
 
-        mortgage = mortgage
-        property_tax = property_tax
+        self.gross_income = gross_income
+        self.mortgage = mortgage
+        self.property_tax = property_tax
+        self.this_year = datetime.now().strftime('%Y')
+        self.bracket = _TAX_BRACKET[self.this_year]
+        self.years = years
         return
 
     def getTaxableIncome(self): # internal
-        pass
-    def getTaxRate(self):       # internal
-        pass
-    def getTax(self, years=10):
+        """
+        @return: taxables: list of taxable over the years
+        """
+        # Deduction is mortgage interest plus property_tax
+        interests = self.mortgage.getAnnualInterest(years=self.years)
+        property_taxes = self.property_tax.getAnnualPropertyTax(years=self.years)
+        deductions = []
+        for i in xrange(self.years):
+            d = interests[i] + property_taxes[i]
+            deductions.append(d)
+
+        # calculate gross income over the years
+        gross_incomes = self.gross_income.getGrossIncome(years=self.years)
+
+        taxables = []
+        for i in xrange(self.years):
+            t = gross_incomes[i] - deductions[i]
+            if t < 0:
+                t = 0
+            taxables.append(t)
+        return taxables
+
+    def calculateOneYearTax(self, income):
+        floor = 0
+        tax = 0
+        for (ceiling, rate) in sorted(self.bracket.items()):
+            if income < ceiling:
+                tax += (income - floor) * rate
+                break
+            tax += (ceiling - floor) * rate
+            floor = ceiling
+        return tax
+
+    def calculateTaxes(self, taxables):       # internal
+        taxes = []
+        for income in taxables:
+            t = self.calculateOneYearTax(income)
+            taxes.append(t)
+        return taxes
+
+    def getTaxes(self):
         """ return a list, each item for a year
         """
-        pass
+        taxables = self.getTaxableIncome()
+        return self.calculateTaxes(taxables)
 
 def main():
     m = Mortgage(total_amount=370000, interest=15000, adr=0.1)
-    interests = m.getAnnualInterest(years=10)
-
     p = PropertyTax(property_tax=8800, increase_rate=0.012)
-    property_taxes = p.getAnnualPropertyTax(years=10)
+    g = GrossIncome(gross_income=200000, increase_rate=0.02)
 
-    g = GrossIncome(gross_income=300000, increase_rate=0.03)
-    gross_incomes = g.getGrossIncome(years=10)
+    years = 10
+    tax = IncomeTax(g, m, p, years)
+    print tax.getTaxes()
     return
 
 if __name__=="__main__":
