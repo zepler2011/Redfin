@@ -1,5 +1,25 @@
 #!/usr/bin/env python
 
+class PropertyTax():
+    def __init__(self,
+                 property_tax=None,
+                 increase_rate=None):
+        self.property_tax = property_tax
+        self.increase_rate = increase_rate
+        return
+
+    def getAnnualPropertyTax(self, years=10):
+        """ Get the property tax over the next 10 years
+        """
+        property_taxes = []
+        property_tax = self.property_tax
+        y = 0
+        while y < years:
+            property_taxes.append(property_tax)
+            y += 1
+            property_tax *= (1.0 + self.increase_rate)
+        return property_taxes
+
 class Mortgage():
     def __init__(self,
                  total_amount=None,
@@ -42,6 +62,9 @@ class IncomeTax():
 def main():
     m = Mortgage(total_amount=370000, interest=15000, adr=0.1)
     interests = m.getAnnualInterest(years=10)
+
+    p = PropertyTax(property_tax=8800, increase_rate=0.012)
+    property_taxes = p.getAnnualPropertyTax(years=10)
     return
 
 if __name__=="__main__":
