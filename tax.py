@@ -40,21 +40,41 @@ class Mortgage():
             annual_interest *= (1.0 - self.decrease_rate)
         return interests
 
+class GrossIncome():
+    def __init__(self,
+                 gross_income,
+                 increase_rate=None):
+        self.gross_income = gross_income
+        self.increase_rate = increase_rate
+        return
+
+    def getGrossIncome(self, years=10):
+        gross_incomes = []
+        gross_income = self.gross_income
+        y = 0
+        while y < years:
+            gross_incomes.append(gross_income)
+            y += 1
+            gross_income *= (1.0 + self.increase_rate)
+        return gross_incomes
+
 class IncomeTax():
     def __init__(self,
                  mortgage=None,
                  gross_income=None,
                  property_tax=None,
                  mortgage_interest=None,
-                 gross_income_annual_increase_rate=None,
-                 property_tax_annual_increase_rate=None):
-        pass
+                 gross_income_annual_increase_rate=None):
+
+        mortgage = mortgage
+        property_tax = property_tax
+        return
+
     def getTaxableIncome(self): # internal
         pass
     def getTaxRate(self):       # internal
         pass
-
-    def getAnnualTax(self, years=10):
+    def getTax(self, years=10):
         """ return a list, each item for a year
         """
         pass
@@ -65,6 +85,9 @@ def main():
 
     p = PropertyTax(property_tax=8800, increase_rate=0.012)
     property_taxes = p.getAnnualPropertyTax(years=10)
+
+    g = GrossIncome(gross_income=300000, increase_rate=0.03)
+    gross_incomes = g.getGrossIncome(years=10)
     return
 
 if __name__=="__main__":
