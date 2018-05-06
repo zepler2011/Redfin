@@ -2,6 +2,7 @@
 
 from datetime import datetime
 
+# https://www.forbes.com/sites/robertberger/2017/12/17/the-new-2018-federal-income-tax-brackets-rates
 _TAX_BRACKET = {
     "2018": {
               19050 : 0.1,
